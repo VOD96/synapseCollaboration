@@ -8,6 +8,9 @@
 		"workshopprep-WorkspaceDefaultSqlServer_connectionString": {
 			"value": ""
 		},
+		"AzureSynapseAnalyticsSourcePool_connectionString": {
+			"value": ""
+		},
 		"workshopprep-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://workshopprepdls.dfs.core.windows.net"
 		}
