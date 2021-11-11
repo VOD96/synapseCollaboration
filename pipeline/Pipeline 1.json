@@ -1,0 +1,62 @@
+{
+	"name": "Pipeline 1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"allowCopyCommand": true
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "workshopprep-WorkspaceDefaultStorage",
+							"type": "LinkedServiceReference"
+						},
+						"path": "workshopprepfilesys/stage"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSynapseAnalyticsTableWithParameter",
+						"type": "DatasetReference",
+						"parameters": {
+							"schemaName": "ingest",
+							"tableName": "customer"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSynapseAnalyticsTableWithParameter",
+						"type": "DatasetReference",
+						"parameters": {
+							"schemaName": "core",
+							"tableName": "customer"
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-11-10T15:51:29Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}
