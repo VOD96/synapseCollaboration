@@ -2,11 +2,8 @@
 	"name": "AzureSynapseAnalyticsTableWithParameter",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "workshopprep-WorkspaceDefaultSqlServer",
-			"type": "LinkedServiceReference",
-			"parameters": {
-				"DBName": "workshoppool"
-			}
+			"referenceName": "AzureSynapseAnalyticsSourcePool",
+			"type": "LinkedServiceReference"
 		},
 		"parameters": {
 			"schemaName": {
