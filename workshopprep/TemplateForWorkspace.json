@@ -1,0 +1,239 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "workshopprep"
+		},
+		"workshopprep-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'workshopprep-WorkspaceDefaultSqlServer'"
+		},
+		"workshopprep-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://workshopprepdls.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/Pipeline 1')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlDWSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"allowCopyCommand": true,
+								"copyCommandSettings": {}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "workshopprep-WorkspaceDefaultStorage",
+									"type": "LinkedServiceReference"
+								},
+								"path": "workshopprepfilesys/stage"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSynapseAnalyticsTableWithParameter",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaName": "ingest",
+									"tableName": "customer"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureSynapseAnalyticsTableWithParameter",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaName": "core",
+									"tableName": "customer"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-11-10T15:51:29Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/AzureSynapseAnalyticsTableWithParameter')]",
+				"[concat(variables('workspaceId'), '/linkedServices/workshopprep-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureSynapseAnalyticsTableWithParameter')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "workshopprep-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "workshoppool"
+					}
+				},
+				"parameters": {
+					"schemaName": {
+						"type": "string"
+					},
+					"tableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/workshopprep-WorkspaceDefaultSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/workshopprep-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('workshopprep-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/workshopprep-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('workshopprep-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/workshoppool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"restorePointInTime": "0001-01-01T00:00:00",
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "westeurope"
+		}
+	]
+}
