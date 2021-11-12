@@ -5,14 +5,20 @@
 		"workspaceName": {
 			"value": "workshopprep"
 		},
+		"AzureSynapseAnalyticsSourcePool_connectionString": {
+			"value": ""
+		},
 		"workshopprep-WorkspaceDefaultSqlServer_connectionString": {
 			"value": ""
 		},
-		"AzureSynapseAnalyticsSourcePool_connectionString": {
+		"AzureSynapseAnalyticsStageArea_accountKey": {
 			"value": ""
 		},
 		"workshopprep-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://workshopprepdls.dfs.core.windows.net"
+		},
+		"AzureSynapseAnalyticsStageArea_properties_typeProperties_url": {
+			"value": "https://workshopprepdls.dfs.core.windows.net/"
 		}
 	}
 }

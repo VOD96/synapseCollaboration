@@ -7,17 +7,25 @@
 			"metadata": "Workspace name",
 			"defaultValue": "workshopprep"
 		},
-		"workshopprep-WorkspaceDefaultSqlServer_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'workshopprep-WorkspaceDefaultSqlServer'"
-		},
 		"AzureSynapseAnalyticsSourcePool_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSynapseAnalyticsSourcePool'"
 		},
+		"workshopprep-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'workshopprep-WorkspaceDefaultSqlServer'"
+		},
+		"AzureSynapseAnalyticsStageArea_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureSynapseAnalyticsStageArea'"
+		},
 		"workshopprep-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://workshopprepdls.dfs.core.windows.net"
+		},
+		"AzureSynapseAnalyticsStageArea_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://workshopprepdls.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -56,7 +64,7 @@
 							"enableStaging": true,
 							"stagingSettings": {
 								"linkedServiceName": {
-									"referenceName": "workshopprep-WorkspaceDefaultStorage",
+									"referenceName": "AzureSynapseAnalyticsStageArea",
 									"type": "LinkedServiceReference"
 								},
 								"path": "workshopprepfilesys/stage"
@@ -93,7 +101,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/AzureSynapseAnalyticsTableWithParameter')]",
-				"[concat(variables('workspaceId'), '/linkedServices/workshopprep-WorkspaceDefaultStorage')]"
+				"[concat(variables('workspaceId'), '/linkedServices/AzureSynapseAnalyticsStageArea')]"
 			]
 		},
 		{
@@ -129,6 +137,25 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/AzureSynapseAnalyticsSourcePool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureSynapseAnalyticsSourcePool')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSynapseAnalyticsSourcePool_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
 			]
 		},
 		{
@@ -237,14 +264,18 @@
 			"location": "westeurope"
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/AzureSynapseAnalyticsSourcePool')]",
+			"name": "[concat(parameters('workspaceName'), '/AzureSynapseAnalyticsStageArea')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"annotations": [],
-				"type": "AzureSqlDW",
+				"type": "AzureBlobFS",
 				"typeProperties": {
-					"connectionString": "[parameters('AzureSynapseAnalyticsSourcePool_connectionString')]"
+					"url": "[parameters('AzureSynapseAnalyticsStageArea_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureSynapseAnalyticsStageArea_accountKey')]"
+					}
 				},
 				"connectVia": {
 					"referenceName": "AutoResolveIntegrationRuntime",
