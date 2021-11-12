@@ -27,7 +27,7 @@
 					"enableStaging": true,
 					"stagingSettings": {
 						"linkedServiceName": {
-							"referenceName": "workshopprep-WorkspaceDefaultStorage",
+							"referenceName": "AzureSynapseAnalyticsStageArea",
 							"type": "LinkedServiceReference"
 						},
 						"path": "workshopprepfilesys/stage"
